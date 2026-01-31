@@ -18,7 +18,6 @@ public class WikipediaMobileTests {
     public void setup() throws Exception {
         driver = WebDriverFactory.createAndroidDriver();
         appPage = new WikipediaAppPage(driver);
-        Thread.sleep(3000);
     }
 
     @AfterMethod
@@ -28,59 +27,64 @@ public class WikipediaMobileTests {
         }
     }
 
-    @Test(priority = 1)
+    @Test
     public void testMainScreenSearchIsDisplayed() {
-        boolean isDisplayed = appPage.isSearchContainerDisplayed();
-        System.out.println("Поле поиска отображается: " + isDisplayed);
-        Assert.assertTrue(isDisplayed);
+        Assert.assertTrue(
+                appPage.isSearchContainerDisplayed(),
+                "Поле поиска должно отображаться на главном экране"
+        );
     }
 
-    @Test(priority = 2)
-    public void testSearchAndOpenArticle() throws InterruptedException {
+    @Test
+    public void testSearchAndOpenArticle() {
         appPage.searchForArticle("Appium");
-        Thread.sleep(3000);
 
         String title = appPage.getArticleTitle();
-        System.out.println("Заголовок статьи: '" + title + "'");
-
-        Assert.assertTrue(title != null && !title.isEmpty());
-        Assert.assertTrue(title.toLowerCase().contains("appium"),
-                "Заголовок должен содержать 'Appium'. Фактический: " + title);
+        Assert.assertTrue(
+                title.toLowerCase().contains("appium"),
+                "Заголовок статьи должен содержать 'Appium'"
+        );
     }
 
-    @Test(priority = 3)
-    public void testSearchAndNavigateBack() throws InterruptedException {
+    @Test
+    public void testSearchAndNavigateBack() {
         appPage.searchForArticle("Selenium");
-        Thread.sleep(3000);
-
-        String title = appPage.getArticleTitle();
-        System.out.println("Открыта статья: " + title);
+        Assert.assertFalse(appPage.getArticleTitle().isEmpty());
 
         appPage.navigateBack();
-        Thread.sleep(2000);
 
-        boolean isDisplayed = appPage.isSearchContainerDisplayed();
-        Assert.assertTrue(isDisplayed, "После возврата должно быть видно поле поиска");
+        Assert.assertTrue(
+                appPage.isSearchContainerDisplayed(),
+                "После возврата должно быть видно поле поиска"
+        );
+    }
+
+    @Test
+    public void testRepeatSearchWithoutRestart() {
+        appPage.searchForArticle("Java");
+        String firstTitle = appPage.getArticleTitle();
+        Assert.assertTrue(firstTitle.contains("Java"));
+
+        appPage.navigateBack();
+
+        appPage.searchForArticle("Python");
+        String secondTitle = appPage.getArticleTitle();
+
+        Assert.assertTrue(
+                secondTitle.contains("Python"),
+                "Повторный поиск должен работать без перезапуска приложения"
+        );
+    }
+
+    @Test
+    public void testExactArticleTitle() {
+        appPage.searchForArticle("Android");
+
+        String title = appPage.getArticleTitle();
+        Assert.assertEquals(
+                title,
+                "Android",
+                "Заголовок статьи должен точно совпадать с ожидаемым"
+        );
     }
 }
-
-
-//@Test для поиска ID
-//public void testFindRealElements() throws InterruptedException {
-//    Thread.sleep(15000);
-//
-//    String source = driver.getPageSource();
-//    System.out.println("=== PAGE SOURCE ===");
-//    System.out.println(source.substring(0, Math.min(2000, source.length())));
-//
-//    System.out.println("\n=== ALL ELEMENTS ===");
-//    var elements = driver.findElements(By.xpath("//*"));
-//    for (var el : elements) {
-//        String id = el.getAttribute("resource-id");
-//        String text = el.getText();
-//        String className = el.getAttribute("class");
-//        if (id != null && !id.isEmpty()) {
-//            System.out.println("ID: " + id + " | Class: " + className + " | Text: " + text);
-//        }
-//    }
-//}

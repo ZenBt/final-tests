@@ -18,35 +18,25 @@ public class WikipediaAppPage {
     private final By SEARCH_CONTAINER = By.id("org.wikipedia.alpha:id/search_container");
     private final By SEARCH_INPUT_FIELD = By.id("org.wikipedia.alpha:id/search_src_text");
     private final By FIRST_RESULT_TITLE = By.id("org.wikipedia.alpha:id/page_list_item_title");
+    private final By ARTICLE_TITLE = By.id("org.wikipedia.alpha:id/view_page_title_text");
     private final By NAVIGATE_UP_BUTTON = AppiumBy.accessibilityId("Navigate up");
     private final By SKIP_BUTTON = By.id("org.wikipedia.alpha:id/fragment_onboarding_skip_button");
     private final By CLOSE_POPUP_BUTTON = By.id("org.wikipedia.alpha:id/closeButton");
 
     public WikipediaAppPage(AndroidDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(5)); // Уменьшил до 5 сек
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    public void skipOnboarding() {
-        try {
-            Thread.sleep(2000); // Даём время на появление
-            if (isElementPresent(SKIP_BUTTON)) {
-                driver.findElement(SKIP_BUTTON).click();
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
+    public void skipOnboardingIfPresent() {
+        if (isElementPresent(SKIP_BUTTON)) {
+            driver.findElement(SKIP_BUTTON).click();
         }
     }
 
     public void closePopupIfPresent() {
-        try {
-            Thread.sleep(1000);
-            if (isElementPresent(CLOSE_POPUP_BUTTON)) {
-                driver.findElement(CLOSE_POPUP_BUTTON).click();
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-            // Игнорируем
+        if (isElementPresent(CLOSE_POPUP_BUTTON)) {
+            driver.findElement(CLOSE_POPUP_BUTTON).click();
         }
     }
 
@@ -60,65 +50,32 @@ public class WikipediaAppPage {
     }
 
     public boolean isSearchContainerDisplayed() {
-        try {
-            skipOnboarding();
-            Thread.sleep(2000);
-            return driver.findElement(SEARCH_CONTAINER).isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
+        skipOnboardingIfPresent();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_CONTAINER)).isDisplayed();
     }
 
     public void searchForArticle(String query) {
-        try {
-            skipOnboarding();
-            Thread.sleep(2000);
+        skipOnboardingIfPresent();
 
-            driver.findElement(SEARCH_CONTAINER).click();
-            Thread.sleep(1000);
+        wait.until(ExpectedConditions.elementToBeClickable(SEARCH_CONTAINER)).click();
 
-            WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_INPUT_FIELD));
-            searchInput.sendKeys(query);
+        WebElement searchInput =
+                wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_INPUT_FIELD));
+        searchInput.sendKeys(query);
 
-            Thread.sleep(3000);
+        wait.until(ExpectedConditions.elementToBeClickable(FIRST_RESULT_TITLE)).click();
 
-            driver.findElement(FIRST_RESULT_TITLE).click();
-
-            Thread.sleep(2000);
-            closePopupIfPresent();
-
-        } catch (Exception e) {
-            System.out.println("Ошибка поиска: " + e.getMessage());
-        }
+        closePopupIfPresent();
     }
 
     public String getArticleTitle() {
-        try {
-            Thread.sleep(3000);
-            closePopupIfPresent();
-
-            WebElement titleElement = driver.findElement(By.xpath("//android.widget.TextView[1]"));
-            return titleElement.getText();
-
-        } catch (Exception e) {
-            System.out.println("Не удалось получить заголовок, пробуем другой локатор...");
-
-            try {
-                WebElement titleElement = driver.findElement(AppiumBy.androidUIAutomator(
-                        "new UiSelector().className(\"android.widget.TextView\").instance(0)"));
-                return titleElement.getText();
-            } catch (Exception ex) {
-                return "";
-            }
-        }
+        closePopupIfPresent();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(ARTICLE_TITLE)).getText();
     }
 
     public void navigateBack() {
         try {
-            Thread.sleep(1000);
-            driver.findElement(NAVIGATE_UP_BUTTON).click();
-            Thread.sleep(2000);
-            closePopupIfPresent();
+            wait.until(ExpectedConditions.elementToBeClickable(NAVIGATE_UP_BUTTON)).click();
         } catch (Exception e) {
             driver.navigate().back();
         }

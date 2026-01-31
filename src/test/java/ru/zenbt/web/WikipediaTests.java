@@ -14,49 +14,83 @@ public class WikipediaTests {
 
     private WebDriver driver;
     private WikipediaPage wikipediaPage;
-    private static final String BASE_URL = "https://ru.wikipedia.org/";
 
     @BeforeMethod
     public void setUp() {
         WebDriverManager.chromedriver().setup();
         driver = WebDriverFactory.createDriver();
-        driver.manage().window().maximize();
-        driver.get(BASE_URL);
         wikipediaPage = new WikipediaPage(driver);
     }
 
     @Test
     public void testMainPageLoadAndElementsDisplay() {
-        Assert.assertTrue(wikipediaPage.isMainPageContentDisplayed(), "Main Wikipedia page content is not displayed.");
+        Assert.assertTrue(
+                wikipediaPage.isMainPageContentDisplayed(),
+                "Контент главной страницы Wikipedia не отображается"
+        );
     }
 
     @Test
     public void testSearchFunctionality() {
-        String searchQuery = "Россия";
-        String expectedArticleTitle = "Россия";
+        wikipediaPage.openMainPage();
+        wikipediaPage.searchFor("Россия");
 
-        wikipediaPage.searchFor(searchQuery);
-
-        String heading = wikipediaPage.getFirstHeadingText();
-
-        Assert.assertEquals(heading, expectedArticleTitle, "Search failed. Expected heading: '" + expectedArticleTitle + "', but got: " + heading);
+        Assert.assertEquals(
+                wikipediaPage.getFirstHeadingText(),
+                "Россия",
+                "Результат поиска некорректен"
+        );
     }
 
     @Test
     public void testRandomPageNavigation() {
-        wikipediaPage.isMainPageContentDisplayed();
+        wikipediaPage.openMainPage();
         String originalUrl = driver.getCurrentUrl();
 
         wikipediaPage.clickRandomPageLink();
 
-        Assert.assertNotEquals(driver.getCurrentUrl(), originalUrl, "Transition to a random page did not occur (URL did not change).");
+        Assert.assertNotEquals(
+                driver.getCurrentUrl(),
+                originalUrl,
+                "Переход на случайную страницу не произошёл"
+        );
     }
 
     @Test
     public void testSearchInputInteractivity() {
-        wikipediaPage.isMainPageContentDisplayed();
+        wikipediaPage.openMainPage();
 
-        Assert.assertTrue(wikipediaPage.isSearchInputDisplayedAndEnabled(), "Search input element is not displayed or enabled for interaction.");
+        Assert.assertTrue(
+                wikipediaPage.isSearchInputDisplayedAndEnabled(),
+                "Поле поиска неактивно или не отображается"
+        );
+    }
+
+    @Test
+    public void testUrlChangesAfterSearch() {
+        wikipediaPage.openMainPage();
+        String mainPageUrl = driver.getCurrentUrl();
+
+        wikipediaPage.searchFor("Москва");
+
+        Assert.assertNotEquals(
+                driver.getCurrentUrl(),
+                mainPageUrl,
+                "URL должен измениться после выполнения поиска"
+        );
+    }
+
+    @Test
+    public void testArticleHeadingIsNotEmpty() {
+        wikipediaPage.openMainPage();
+        wikipediaPage.searchFor("Санкт-Петербург");
+
+        String heading = wikipediaPage.getFirstHeadingText();
+
+        Assert.assertTrue(
+                heading != null && !heading.trim().isEmpty(),
+                "Заголовок статьи не должен быть пустым"
+        );
     }
 
     @AfterMethod

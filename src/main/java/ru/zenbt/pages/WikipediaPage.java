@@ -12,6 +12,7 @@ public class WikipediaPage {
 
     private final WebDriver driver;
     private final WebDriverWait wait;
+
     private static final String BASE_URL = "https://ru.wikipedia.org/wiki/Заглавная_страница";
 
     private final By WIKI_LOGO = By.id("p-logo");
@@ -25,35 +26,38 @@ public class WikipediaPage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
-    public boolean isMainPageContentDisplayed() {
+    public void openMainPage() {
         driver.get(BASE_URL);
-        try {
-            wait.until(ExpectedConditions.visibilityOfElementLocated(WIKI_LOGO));
-            return wait.until(ExpectedConditions.visibilityOfElementLocated(BODY_CONTENT)).isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
+        wait.until(ExpectedConditions.visibilityOfElementLocated(WIKI_LOGO));
+    }
+
+    public boolean isMainPageContentDisplayed() {
+        openMainPage();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(BODY_CONTENT)).isDisplayed();
     }
 
     public void searchFor(String query) {
-        WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_INPUT));
+        WebElement searchInput =
+                wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_INPUT));
         searchInput.clear();
         searchInput.sendKeys(query);
         searchInput.submit();
     }
 
     public String getFirstHeadingText() {
-        return wait.until(ExpectedConditions.visibilityOfElementLocated(ARTICLE_HEADING)).getText().trim();
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(ARTICLE_HEADING))
+                .getText()
+                .trim();
     }
 
     public void clickRandomPageLink() {
-        WebElement randomLink = wait.until(ExpectedConditions.elementToBeClickable(RANDOM_PAGE_LINK));
-        randomLink.click();
+        wait.until(ExpectedConditions.elementToBeClickable(RANDOM_PAGE_LINK)).click();
         wait.until(ExpectedConditions.visibilityOfElementLocated(BODY_CONTENT));
     }
 
     public boolean isSearchInputDisplayedAndEnabled() {
-        WebElement searchInput = wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_INPUT));
+        WebElement searchInput =
+                wait.until(ExpectedConditions.visibilityOfElementLocated(SEARCH_INPUT));
         return searchInput.isDisplayed() && searchInput.isEnabled();
     }
 }

@@ -1,58 +1,99 @@
-# Автоматизированные тесты для веб (wikipedia.org) и мобильного приложения Wikipedia
+# Автоматизированные тесты для веб-сайта Wikipedia и мобильного приложения Wikipedia
 
 ## Описание проекта
-Проект содержит автоматизированные тесты для:
-1. Веб-сайта ru.wikipedia.org (4 теста)
-2. Мобильного приложения Wikipedia (3 теста)
 
-## Технологии
-- Java 11
-- Selenium WebDriver
-- Appium
-- TestNG
+Проект содержит автоматизированные UI-тесты для:
+
+1. **Веб-сайта** `ru.wikipedia.org` — **6 сценариев**
+2. **Мобильного Android-приложения Wikipedia** — **5 сценариев**
+
+Тесты реализованы в учебных целях и демонстрируют:
+- работу с Selenium WebDriver и Appium;
+- применение Page Object Model;
+- стабильные UI-проверки с использованием ожиданий;
+- запуск тестов через TestNG и Maven.
+
+## Используемые технологии
+
+- Java 11+
 - Maven
+- Selenium WebDriver
+- Appium (UiAutomator2)
+- TestNG
+- WebDriverManager
+- Android Emulator
 
-## Требования
-1. Установить Java 11+
+## Структура проекта (кратко)
+
+src/test/java  
+├── ru.zenbt.pages        // Page Object'ы (Web + Mobile)  
+├── ru.zenbt.web          // Веб-тесты (Selenium)  
+├── ru.zenbt.mobile       // Мобильные тесты (Appium)  
+└── ru.zenbt.utils        // Фабрика драйверов  
+
+## Покрытие тестами
+
+### Веб-тесты (ru.wikipedia.org) — 6 сценариев
+
+- загрузка главной страницы и отображение контента;
+- проверка доступности и интерактивности поля поиска;
+- поиск статьи и проверка заголовка;
+- переход на случайную страницу;
+- проверка изменения URL после поиска;
+- проверка, что заголовок статьи не пустой.
+
+### Мобильные тесты (Wikipedia Android App) — 5 сценариев
+
+- отображение главного экрана и поля поиска;
+- поиск статьи и открытие результата;
+- проверка заголовка открытой статьи;
+- возврат назад к экрану поиска;
+- повторный поиск без перезапуска приложения;
+- проверка точного совпадения заголовка статьи.
+
+## Требования к окружению
+
+### Общее
+1. Установить Java 11 или выше
 2. Установить Maven
-3. Установить Chrome браузер
-4. Для мобильных тестов:
-    - Установить Appium: `npm install -g appium`
-    - Установить Android Studio
-    - Создать эмулятор Android
-    - Установить приложение Wikipedia на эмулятор
+3. Установить Google Chrome
+
+### Для мобильных тестов
+1. Установить Node.js
+2. Установить Appium  
+   npm install -g appium
+3. Установить Android Studio
+4. Создать и запустить Android-эмулятор
+5. Установить приложение Wikipedia (alpha-версия)
+
+## Подготовка мобильного окружения
+
+### Запуск эмулятора
+emulator -avd Pixel_5
+
+### Установка приложения Wikipedia
+APK можно скачать с официального репозитория:  
+https://github.com/wikimedia/apps-android-wikipedia/releases
+
+adb install app-alpha-universal-release.apk
+
+### Запуск Appium Server
+appium -p 4723
 
 ## Запуск тестов
-```bash
+
+### Запуск всех тестов
 mvn clean test
-```
-![img.jpg](img.jpg)
 
-### 1. Веб-тесты (сайт ru.wikipedia.org)
-```bash
+### Запуск только веб-тестов
 mvn test -Dtest=WikipediaTests
-```
 
-### 2. Мобильные тесты (Wikipedia)
-Приложение скачано [app-alpha-universal-release.apk](https://github.com/wikimedia/apps-android-wikipedia/releases/tag/latest)
-- Запуск Android эмулятора
-    ```bash
-    emulator -avd Pixel_5
-    ```
-![img_2.jpg](img_2.jpg)
-- Загрузка приложения на эмулятор
-```bash
-adb -s emulator-5554 install app-alpha-universal-release.apk
-```
-- Запуск Appium сервера
-    ```bashtest_HW-master
-    appium -p 4723
-    ```
-![img_1.jpg](img_1.jpg)
-- Запуск тестов
-```bash
+### Запуск только мобильных тестов
 mvn test -Dtest=WikipediaMobileTests
-```
 
+## Примечания
 
-
+- В тестах используются явные ожидания (WebDriverWait), что обеспечивает стабильность выполнения.
+- Архитектура проекта соответствует принципам Page Object Model.
+- Проект ориентирован на читаемость и поддержку.
+- Тесты проверены в браузере Chrome и на Android-эмуляторе.
